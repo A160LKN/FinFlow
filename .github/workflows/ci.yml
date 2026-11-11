@@ -1,0 +1,46 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  quality:
+    name: Lint и юнит-тесты
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: ESLint
+        run: npm run lint
+      - name: Юнит-тесты
+        run: npm run test:unit
+
+  e2e:
+    name: E2E-тесты (Playwright)
+    needs: quality
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Установить браузер
+        run: npx playwright install --with-deps chromium
+      - name: E2E-тесты
+        run: npm run test:e2e
+      - name: Сохранить отчёт Playwright
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 14

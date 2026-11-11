@@ -1,0 +1,23 @@
+{
+  "name": "finflow",
+  "version": "2.0.0",
+  "description": "Учёт личных финансов на чистом JavaScript: категории, бюджеты, графики, CSV, PWA",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "node scripts/serve.js",
+    "lint": "eslint .",
+    "test:unit": "node --test \"tests/unit/*.test.js\"",
+    "test:e2e": "playwright test",
+    "test": "npm run lint && npm run test:unit && npm run test:e2e"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "devDependencies": {
+    "@eslint/js": "9.39.5",
+    "@playwright/test": "1.63.0",
+    "eslint": "9.39.5",
+    "globals": "17.14.0"
+  }
+}

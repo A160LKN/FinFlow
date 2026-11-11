@@ -1,0 +1,1074 @@
+/* ========== Сброс ========== */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* ========== Цвета ========== */
+:root {
+  --font: 'Onest', system-ui, -apple-system, sans-serif;
+  --radius-panel: 16px;
+  --radius-control: 9px;
+  --ease: 0.2s ease;
+}
+
+/* Светлая тема: бумага с лёгким оттенком банкноты, синие чернила */
+[data-theme="light"] {
+  --paper: #f2f4ef;
+  --surface: #ffffff;
+  --ink: #17232e;
+  --muted: #5d6a75;
+  --line: #dde2db;
+  --accent: #1f4e8c;
+  --accent-ink: #ffffff;
+  --income: #1d7a55;
+  --expense: #b4234a;
+  --track: #e8ece6;
+  --cat-1: #1f4e8c;
+  --cat-2: #2f8f83;
+  --cat-3: #c58a1b;
+  --cat-4: #b4234a;
+  --cat-5: #6b4fa3;
+  --cat-6: #6d8b2e;
+  --cat-7: #8a6a4a;
+  --cat-8: #7d8a95;
+}
+
+/* Тёмная тема */
+[data-theme="dark"] {
+  --paper: #121a21;
+  --surface: #19232c;
+  --ink: #e6ecf1;
+  --muted: #95a3af;
+  --line: #2a3742;
+  --accent: #7fa9e6;
+  --accent-ink: #0f1820;
+  --income: #4fc08f;
+  --expense: #f17c98;
+  --track: #22303a;
+  --cat-1: #7fa9e6;
+  --cat-2: #4fbfae;
+  --cat-3: #e3b04f;
+  --cat-4: #f17c98;
+  --cat-5: #a98ae0;
+  --cat-6: #a7c45c;
+  --cat-7: #c49c74;
+  --cat-8: #9aa7b2;
+}
+
+/* ========== Страница ========== */
+body {
+  min-height: 100vh;
+  font-family: var(--font);
+  font-size: 15px;
+  line-height: 1.5;
+  color: var(--ink);
+  background: var(--paper);
+  transition: background var(--ease), color var(--ease);
+}
+
+.page {
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 24px 24px 64px;
+}
+
+/* Цифры одинаковой ширины: суммы в столбик не «прыгают» */
+.total__value,
+.ring__value,
+.tx__amount,
+.day__sum,
+.legend__sum {
+  font-variant-numeric: tabular-nums;
+}
+
+svg {
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  fill: none;
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* ========== Шапка ========== */
+.topbar {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--accent);
+}
+
+.brand__mark {
+  width: 28px;
+  height: 28px;
+  transform: rotate(-90deg);
+}
+
+.brand__name {
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+}
+
+.month {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.month__label {
+  min-width: 190px;
+  text-align: center;
+  font-size: 22px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.topbar__tools {
+  display: flex;
+  justify-content: flex-end;
+  gap: 6px;
+}
+
+.icon-btn {
+  width: 40px;
+  height: 40px;
+  display: grid;
+  place-items: center;
+  color: var(--ink);
+  background: transparent;
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  cursor: pointer;
+  transition: background var(--ease), border-color var(--ease);
+}
+
+.icon-btn:hover:not(:disabled) {
+  background: var(--surface);
+  border-color: var(--muted);
+}
+
+.icon-btn:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.icon-btn svg {
+  width: 18px;
+  height: 18px;
+}
+
+[data-theme="light"] .icon-sun,
+[data-theme="dark"] .icon-moon {
+  display: none;
+}
+
+.text-btn {
+  white-space: nowrap;
+  font: 600 14px var(--font);
+  color: var(--accent);
+  background: none;
+  border: none;
+  border-radius: 6px;
+  padding: 8px 10px;
+  cursor: pointer;
+}
+
+.text-btn:hover {
+  text-decoration: underline;
+}
+
+/* ========== Сетка ========== */
+.layout {
+  display: grid;
+  grid-template-columns: 340px 1fr;
+  gap: 20px;
+  align-items: start;
+}
+
+.side {
+  display: grid;
+  gap: 20px;
+}
+
+.list-panel {
+  grid-column: 1 / -1;
+}
+
+.panel__head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.panel__head .panel__title {
+  margin-bottom: 0;
+}
+
+.panel {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-panel);
+  padding: 22px;
+}
+
+.panel__title {
+  font-size: 17px;
+  font-weight: 600;
+  margin-bottom: 16px;
+}
+
+/* ========== Кольцо расходов ========== */
+.ring {
+  position: relative;
+  width: 220px;
+  height: 220px;
+  margin: 4px auto 20px;
+}
+
+.ring__svg {
+  width: 100%;
+  height: 100%;
+  transform: rotate(-90deg);
+  stroke-linecap: butt;
+}
+
+.ring__track {
+  stroke: var(--track);
+}
+
+.ring__segment {
+  cursor: pointer;
+  transition: stroke-width var(--ease), opacity var(--ease);
+}
+
+.ring__segment:hover {
+  stroke-width: 26;
+}
+
+.ring.has-selection .ring__segment {
+  opacity: 0.25;
+}
+
+.ring.has-selection .ring__segment.is-selected {
+  opacity: 1;
+  stroke-width: 26;
+}
+
+.ring__center {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  pointer-events: none;
+  padding: 0 44px;
+}
+
+.ring__caption {
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.ring__value {
+  font-size: 24px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.legend {
+  list-style: none;
+  display: grid;
+  gap: 2px;
+}
+
+.legend__item {
+  width: 100%;
+  display: grid;
+  grid-template-columns: 10px 1fr auto auto;
+  align-items: center;
+  gap: 10px;
+  padding: 7px 8px;
+  font: inherit;
+  font-size: 14px;
+  color: var(--ink);
+  text-align: left;
+  background: none;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.legend__item:hover,
+.legend__item.is-selected {
+  background: var(--paper);
+}
+
+.legend__dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+}
+
+.legend__share {
+  color: var(--muted);
+  font-size: 13px;
+  min-width: 36px;
+  text-align: right;
+}
+
+.legend__sum {
+  font-weight: 600;
+}
+
+.ring-empty {
+  display: none;
+  text-align: center;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.ring-panel.is-empty .ring-empty {
+  display: block;
+}
+
+.ring-panel.is-empty .legend {
+  display: none;
+}
+
+/* ========== Итоги ========== */
+.totals {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-panel);
+}
+
+.total {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 18px 22px;
+}
+
+.total + .total {
+  border-left: 1px solid var(--line);
+}
+
+.total__label {
+  font-size: 14px;
+  color: var(--muted);
+}
+
+.total__value {
+  font-size: 26px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  white-space: nowrap;
+}
+
+.total__value--income {
+  color: var(--income);
+}
+
+.total__value--expense {
+  color: var(--expense);
+}
+
+.total__hint {
+  font-size: 13px;
+  color: var(--muted);
+}
+
+/* ========== Форма ========== */
+.segmented {
+  display: inline-grid;
+  grid-auto-flow: column;
+  padding: 3px;
+  margin-bottom: 16px;
+  background: var(--paper);
+  border-radius: 10px;
+}
+
+.segmented__item input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.segmented__item span {
+  display: block;
+  padding: 7px 18px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--muted);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background var(--ease), color var(--ease);
+}
+
+.segmented__item input:checked + span {
+  color: var(--ink);
+  background: var(--surface);
+  box-shadow: 0 1px 2px rgba(23, 35, 46, 0.12);
+}
+
+.segmented__item input[value="expense"]:checked + span {
+  color: var(--expense);
+}
+
+.segmented__item input[value="income"]:checked + span {
+  color: var(--income);
+}
+
+.segmented__item input:focus-visible + span {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+.form__grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px 14px;
+}
+
+.field {
+  display: grid;
+  gap: 5px;
+}
+
+.field__label {
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.field__input,
+.search {
+  width: 100%;
+  font: 15px var(--font);
+  color: var(--ink);
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-control);
+  padding: 10px 12px;
+  transition: border-color var(--ease);
+}
+
+.field__input:focus,
+.search:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.field__input.is-invalid {
+  border-color: var(--expense);
+}
+
+[data-theme="dark"] .field__input {
+  color-scheme: dark;
+}
+
+.form__error {
+  min-height: 22px;
+  margin: 10px 0 6px;
+  font-size: 14px;
+  color: var(--expense);
+}
+
+/* ========== Кнопки ========== */
+.btn {
+  font: 600 15px var(--font);
+  border-radius: var(--radius-control);
+  padding: 11px 20px;
+  cursor: pointer;
+  transition: background var(--ease), border-color var(--ease), transform 0.1s;
+}
+
+.btn:active {
+  transform: translateY(1px);
+}
+
+.btn--primary {
+  color: var(--accent-ink);
+  background: var(--accent);
+  border: 1px solid var(--accent);
+}
+
+.btn--primary:hover {
+  filter: brightness(1.1);
+}
+
+.btn--ghost {
+  color: var(--ink);
+  background: transparent;
+  border: 1px solid var(--line);
+}
+
+.btn--ghost:hover:not(:disabled) {
+  border-color: var(--muted);
+}
+
+.btn:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+/* ========== Список операций ========== */
+.list-head {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.list-head .panel__title {
+  margin-bottom: 0;
+}
+
+.list-tools {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+
+.chips {
+  display: flex;
+  gap: 4px;
+}
+
+.chip {
+  font: 500 14px var(--font);
+  color: var(--muted);
+  background: transparent;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 7px 14px;
+  cursor: pointer;
+  transition: color var(--ease), background var(--ease), border-color var(--ease);
+}
+
+.chip:hover {
+  color: var(--ink);
+}
+
+.file-btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+.file-btn input {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.file-btn:focus-within {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.chip.is-active {
+  color: var(--accent-ink);
+  background: var(--ink);
+  border-color: var(--ink);
+}
+
+.search {
+  width: 200px;
+  padding: 8px 12px;
+}
+
+.active-category {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+  margin: 8px 0 0;
+  font-size: 14px;
+  color: var(--muted);
+}
+
+.active-category[hidden] {
+  display: none;
+}
+
+.day {
+  margin-top: 18px;
+}
+
+.day__head {
+  display: flex;
+  justify-content: space-between;
+  padding: 0 4px 6px;
+  font-size: 13px;
+  color: var(--muted);
+  border-bottom: 1px solid var(--line);
+}
+
+.day__title::first-letter {
+  text-transform: uppercase;
+}
+
+.tx {
+  display: grid;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 4px;
+  border-bottom: 1px solid var(--line);
+}
+
+.tx:last-child {
+  border-bottom: none;
+}
+
+.tx.is-new {
+  animation: tx-in 0.6s ease;
+}
+
+@keyframes tx-in {
+  from { background: color-mix(in srgb, var(--accent) 14%, transparent); }
+  to   { background: transparent; }
+}
+
+.tx.is-leaving {
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.tx__icon {
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--cat-color);
+  background: color-mix(in srgb, var(--cat-color) 14%, transparent);
+  border-radius: 10px;
+}
+
+.tx__main {
+  min-width: 0;
+}
+
+.tx__category {
+  font-weight: 500;
+}
+
+.tx__note {
+  font-size: 13px;
+  color: var(--muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.tx__amount {
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.tx__amount--income {
+  color: var(--income);
+}
+
+
+
+
+
+.empty {
+  display: none;
+  padding: 36px 0 12px;
+  text-align: center;
+  color: var(--muted);
+}
+
+.empty.is-visible {
+  display: grid;
+  justify-items: center;
+  gap: 14px;
+}
+
+.empty .btn[hidden] {
+  display: none;
+}
+
+/* ========== Уведомление ========== */
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: 24px;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 10px 10px 10px 18px;
+  font-size: 14px;
+  color: var(--paper);
+  background: var(--ink);
+  border-radius: 12px;
+  box-shadow: 0 12px 32px rgba(10, 20, 30, 0.25);
+  visibility: hidden;
+  opacity: 0;
+  transform: translate(-50%, 12px);
+  transition: opacity 0.2s ease, transform 0.2s ease, visibility 0.2s;
+}
+
+.toast.is-visible {
+  visibility: visible;
+  opacity: 1;
+  transform: translate(-50%, 0);
+}
+
+.toast__action {
+  font: 600 14px var(--font);
+  color: var(--paper);
+  background: color-mix(in srgb, var(--paper) 16%, transparent);
+  border: none;
+  border-radius: 8px;
+  padding: 6px 12px;
+  cursor: pointer;
+}
+
+/* ========== Адаптивность ========== */
+@media (max-width: 860px) {
+  .layout {
+    grid-template-columns: 1fr;
+  }
+
+  .topbar {
+    grid-template-columns: 1fr auto;
+  }
+
+  .month {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    justify-content: space-between;
+  }
+}
+
+@media (max-width: 560px) {
+  .page {
+    padding: 16px 16px 48px;
+  }
+
+  .month__label {
+    min-width: 0;
+    font-size: 19px;
+  }
+
+  .totals {
+    grid-template-columns: 1fr;
+  }
+
+  .total + .total {
+    border-left: none;
+    border-top: 1px solid var(--line);
+  }
+
+  .total {
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: baseline;
+    padding: 14px 18px;
+  }
+
+  .total__value {
+    font-size: 21px;
+  }
+
+  .total__hint {
+    flex-basis: 100%;
+    text-align: right;
+  }
+
+  .form__grid {
+    grid-template-columns: 1fr;
+  }
+
+  .btn--primary {
+    width: 100%;
+  }
+
+  .list-tools,
+  .search {
+    width: 100%;
+  }
+
+  .panel {
+    padding: 18px;
+  }
+}
+
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+
+/* ========== Форма: режим редактирования ========== */
+.form__actions {
+  display: flex;
+  gap: 10px;
+}
+
+.form-panel.is-editing {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 18%, transparent);
+}
+
+.tx.is-editing {
+  background: color-mix(in srgb, var(--accent) 8%, transparent);
+}
+
+.tx {
+  grid-template-columns: 34px 1fr auto 32px 32px;
+}
+
+.tx__action {
+  width: 32px;
+  height: 32px;
+  display: grid;
+  place-items: center;
+  color: var(--muted);
+  background: none;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity var(--ease), color var(--ease), background var(--ease);
+}
+
+.tx:hover .tx__action,
+.tx__action:focus-visible,
+.tx.is-editing .tx__action {
+  opacity: 1;
+}
+
+.tx__action:hover {
+  color: var(--accent);
+  background: var(--paper);
+}
+
+.tx__action--delete:hover {
+  color: var(--expense);
+}
+
+.tx__action svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* ========== Бюджеты ========== */
+.budgets-panel,
+.chart-panel {
+  align-self: stretch;
+}
+
+.budgets-panel .form__error:empty {
+  display: none;
+}
+
+.budget {
+  padding: 8px 0;
+}
+
+.budget + .budget {
+  border-top: 1px solid var(--line);
+}
+
+.budget__row {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 14px;
+}
+
+.budget__name {
+  font-weight: 500;
+}
+
+.budget__numbers {
+  font-variant-numeric: tabular-nums;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.budget__bar {
+  height: 6px;
+  margin: 7px 0 4px;
+  background: var(--track);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.budget__fill {
+  height: 100%;
+  border-radius: inherit;
+  background: var(--income);
+  transition: width 0.4s ease;
+}
+
+.budget--warning .budget__fill { background: var(--cat-3); }
+.budget--over .budget__fill { background: var(--expense); }
+
+.budget__note {
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.budget--over .budget__note {
+  color: var(--expense);
+  font-weight: 500;
+}
+
+.budgets-empty {
+  font-size: 14px;
+  color: var(--muted);
+}
+
+.budget-form {
+  display: grid;
+  gap: 8px;
+}
+
+.budget-form__row {
+  display: grid;
+  grid-template-columns: 1fr 120px;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+}
+
+.budget-form .field__input {
+  padding: 7px 10px;
+  text-align: right;
+}
+
+/* ========== График ========== */
+.chart {
+  display: block;
+  width: 100%;
+  height: 220px;
+  overflow: visible;
+}
+
+.chart text {
+  fill: var(--muted);
+  stroke: none;
+  font: 12px var(--font);
+}
+
+.chart .grid-line {
+  stroke: var(--line);
+  stroke-width: 1;
+}
+
+.chart .bar {
+  stroke: none;
+}
+
+.chart .bar--income { fill: var(--income); }
+.chart .bar--expense { fill: var(--expense); }
+
+.chart .month-hit {
+  fill: transparent;
+  stroke: none;
+  cursor: pointer;
+}
+
+.chart .month-group:hover .month-hit,
+.chart .month-group:focus-visible .month-hit {
+  fill: color-mix(in srgb, var(--ink) 5%, transparent);
+}
+
+.chart .month-group:focus-visible {
+  outline: none;
+}
+
+.chart .month-group.is-current text {
+  fill: var(--ink);
+  font-weight: 600;
+}
+
+.chart-legend {
+  display: flex;
+  gap: 14px;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.chart-legend > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.swatch {
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+}
+
+.swatch--income { background: var(--income); }
+.swatch--expense { background: var(--expense); }
+
+.chart-hint {
+  margin-top: 6px;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+@media (hover: none) {
+  .tx__action {
+    opacity: 1;
+  }
+}
+
+@media (max-width: 560px) {
+  .tx {
+    grid-template-columns: 34px 1fr auto 28px 28px;
+    gap: 8px;
+  }
+
+  .form__actions .btn {
+    flex: 1;
+  }
+
+  .chart-legend {
+    display: none;
+  }
+}
