@@ -121,4 +121,26 @@ test.describe('Настройки', () => {
     await expect(page.locator('html')).not.toHaveAttribute('data-theme', initial);
     await expect(page.getByTestId('submit')).toHaveText('Add');
   });
+
+  // BUG-06: комментарии примера оставались на русском после переключения на английский
+  test('комментарии примера переводятся вместе с интерфейсом', async ({ page }) => {
+    const notes = page.getByTestId('tx-note');
+    await page.getByTestId('lang-toggle').click();
+    await expect(notes.filter({ hasText: 'Lunch with colleagues' })).toHaveCount(1);
+    for (const note of await notes.allTextContents()) expect(note).not.toMatch(/[а-яё]/i);
+
+    await page.getByTestId('lang-toggle').click();
+    await expect(notes.filter({ hasText: 'Обед с коллегами' })).toHaveCount(1);
+  });
+
+  test('изменённый комментарий примера больше не переводится', async ({ page }) => {
+    const item = app.items.filter({ hasText: 'Обед с коллегами' });
+    await item.hover();
+    await item.getByTestId('tx-edit').click();
+    await app.note.fill('Обед с мамой');
+    await app.submit.click();
+
+    await page.getByTestId('lang-toggle').click();
+    await expect(page.getByTestId('tx-note').filter({ hasText: 'Обед с мамой' })).toHaveCount(1);
+  });
 });

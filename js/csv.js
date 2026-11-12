@@ -54,7 +54,9 @@ export function parseCSVRows(text) {
 }
 
 /** Ключ для поиска дублей: операции с одинаковыми датой, типом, категорией, суммой и комментарием */
-export const transactionKey = (tx) => [tx.date, tx.type, tx.category, tx.amount, tx.note].join('|');
+// noteId приводит комментарий к общему виду — например, комментарий примера на любом языке
+export const transactionKey = (tx, noteId = (note) => note) =>
+  [tx.date, tx.type, tx.category, tx.amount, noteId(tx.note)].join('|');
 
 /**
  * Текст CSV → операции. Строки с ошибками пропускаются, их номера возвращаются в skipped.
@@ -67,7 +69,7 @@ export const transactionKey = (tx) => [tx.date, tx.type, tx.category, tx.amount,
  *
  * @returns {{ transactions: Array<object>, skipped: number[], duplicates: number }}
  */
-export function fromCSV(text, { today, createId, existing = [], now = Date.now() }) {
+export function fromCSV(text, { today, createId, existing = [], noteId, now = Date.now() }) {
   const rows = parseCSVRows(text);
   const transactions = [];
   const skipped = [];
@@ -76,7 +78,7 @@ export function fromCSV(text, { today, createId, existing = [], now = Date.now()
   // Сколько раз каждая операция уже встречается в приложении
   const alreadyHave = new Map();
   for (const tx of existing) {
-    const key = transactionKey(tx);
+    const key = transactionKey(tx, noteId);
     alreadyHave.set(key, (alreadyHave.get(key) || 0) + 1);
   }
 
@@ -93,7 +95,7 @@ export function fromCSV(text, { today, createId, existing = [], now = Date.now()
     if (!valid) { skipped.push(line); return; }
 
     const tx = { type, category: category.id, amount: parsed.tiyn, date, note: note.slice(0, 80) };
-    const key = transactionKey(tx);
+    const key = transactionKey(tx, noteId);
     if (alreadyHave.get(key) > 0) {
       alreadyHave.set(key, alreadyHave.get(key) - 1);
       duplicates++;

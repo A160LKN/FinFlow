@@ -1,6 +1,7 @@
 // Пример данных: прошлый месяц целиком и текущий — только дни, которые уже наступили.
 
 import { monthOf, shiftMonth } from './dates.js';
+import { translations } from './i18n.js';
 
 const PLAN = [
   // [день, тип, категория, сумма в тенге, ключ комментария]
@@ -39,6 +40,7 @@ export function demoTransactions({ today, notes, createId, now = Date.now() }) {
     amount: tenge * 100,
     date: `${month}-${String(day).padStart(2, '0')}`,
     note: notes[noteKey],
+    noteKey,   // BUG-06: по ключу комментарий переводится при смене языка
     createdAt: now + k++,
   });
 
@@ -62,3 +64,19 @@ export function demoTransactions({ today, notes, createId, now = Date.now() }) {
   }
   return result;
 }
+
+/**
+ * Переводит комментарии операций примера на язык notes (BUG-06).
+ * Комментарии пользователя не трогаются: у них нет noteKey,
+ * а при редактировании операции примера ключ снимается.
+ */
+export function localizeDemoNotes(transactions, notes) {
+  return transactions.map((tx) => (tx.noteKey && notes[tx.noteKey] ? { ...tx, note: notes[tx.noteKey] } : tx));
+}
+
+// Комментарий примера на любом языке → один идентификатор: «Кофе» и «Coffee» — одно и то же
+const DEMO_NOTE_IDS = new Map(Object.values(translations)
+  .flatMap(({ demoNotes }) => Object.entries(demoNotes).map(([key, text]) => [text, `demo:${key}`])));
+
+/** Для поиска дублей при импорте: файл примера, выгруженный на другом языке, — не новые операции */
+export const demoNoteId = (note) => DEMO_NOTE_IDS.get(note) ?? note;

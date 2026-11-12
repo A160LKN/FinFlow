@@ -7,7 +7,7 @@ import { budgetStatus, expensesByCategory, expenseTrend, inMonth, monthlySeries,
 import { fromCSV, toCSV } from './csv.js';
 import { CATEGORIES, findCategory, translations } from './i18n.js';
 import { storage, STORAGE_KEYS } from './storage.js';
-import { DEMO_BUDGETS, demoTransactions } from './demo.js';
+import { DEMO_BUDGETS, demoNoteId, demoTransactions, localizeDemoNotes } from './demo.js';
 import { $, el, icon } from './ui/dom.js';
 import { renderRing } from './ui/ring.js';
 import { renderChart } from './ui/chart.js';
@@ -295,6 +295,7 @@ function submitForm(event) {
 
   if (state.editingId) {
     const tx = state.transactions.find((x) => x.id === state.editingId);
+    if (data.note !== tx.note) delete tx.noteKey;   // свой комментарий больше не переводим
     Object.assign(tx, data);
     state.highlightId = tx.id;
     state.editingId = null;
@@ -388,6 +389,7 @@ async function importCSV(file) {
     today: todayISO(),
     createId,
     existing: state.transactions,   // BUG-05: не добавлять операции, которые уже есть
+    noteId: demoNoteId,             // пример, выгруженный на другом языке, — тоже дубль
   });
   els.importInput.value = '';
   if (transactions.length === 0) {
@@ -428,6 +430,8 @@ function applyLanguage() {
   if (state.errorKey) els.formError.textContent = tr[state.errorKey];
   if (state.editingBudgets) els.budgetsToggle.textContent = tr.budgetsDone;
   storage.set(STORAGE_KEYS.lang, state.lang);
+  state.transactions = localizeDemoNotes(state.transactions, tr.demoNotes);   // BUG-06
+  save();
   fillCategories();
   setFormMode();
   render();

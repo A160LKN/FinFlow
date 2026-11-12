@@ -1,6 +1,6 @@
 {
   "name": "finflow",
-  "version": "2.1.0",
+  "version": "2.2.0",
   "description": "Учёт личных финансов на чистом JavaScript: категории, бюджеты, графики, CSV, PWA",
   "private": true,
   "type": "module",
