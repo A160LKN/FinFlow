@@ -94,6 +94,18 @@ test.describe('Диаграмма, бюджеты и график', () => {
     });
     await expect(app.toast).toContainText('Загружено операций: 1, пропущено строк с ошибками: 1');
   });
+
+  // BUG-05: повторный импорт того же файла дублировал операции и удваивал итоги
+  test('повторный импорт того же файла не создаёт дублей', async ({ page }) => {
+    const countBefore = await app.items.count();
+    const [download] = await Promise.all([page.waitForEvent('download'), page.getByTestId('export-csv').click()]);
+
+    await page.getByTestId('import-csv').setInputFiles(await download.path());
+
+    await expect(app.toast).toContainText('Все операции из файла уже есть');
+    await expect(app.items).toHaveCount(countBefore);
+    expect(plain(await app.totalExpense.textContent())).toBe('134 950 ₸');
+  });
 });
 
 test.describe('Настройки', () => {

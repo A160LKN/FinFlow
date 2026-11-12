@@ -70,3 +70,53 @@ describe('fromCSV', () => {
     assert.deepEqual(fromCSV('просто текст', options).transactions, []);
   });
 });
+
+// BUG-05: повторный импорт того же файла дублировал операции
+describe('fromCSV — дубли (BUG-05)', () => {
+  const csv = toCSV(sample, 'ru', translations.ru.csvHeader);
+
+  it('повторный импорт того же файла ничего не добавляет', () => {
+    const first = fromCSV(csv, options).transactions;
+    const second = fromCSV(csv, { ...options, existing: first });
+    assert.equal(second.transactions.length, 0);
+    assert.equal(second.duplicates, 2);
+  });
+
+  it('добавляет только новые операции из файла', () => {
+    const existing = fromCSV(csv, options).transactions.slice(0, 1);   // в приложении одна из двух
+    const result = fromCSV(csv, { ...options, existing });
+    assert.equal(result.transactions.length, 1);
+    assert.equal(result.duplicates, 1);
+  });
+
+  it('одинаковые строки в одном файле — это разные покупки, а не дубли', () => {
+    const text = [
+      'Дата;Тип;Категория;Сумма;Комментарий',
+      '2026-11-05;Расход;Кафе и рестораны;-1800.00;Кофе',
+      '2026-11-05;Расход;Кафе и рестораны;-1800.00;Кофе',
+    ].join('\n');
+    const result = fromCSV(text, options);
+    assert.equal(result.transactions.length, 2);
+    assert.equal(result.duplicates, 0);
+  });
+
+  it('учитывает количество: две одинаковые в приложении, три в файле — добавляется одна', () => {
+    const row = '2026-11-05;Расход;Кафе и рестораны;-1800.00;Кофе';
+    const header = 'Дата;Тип;Категория;Сумма;Комментарий';
+    const existing = fromCSV([header, row, row].join('\n'), options).transactions;
+    const result = fromCSV([header, row, row, row].join('\n'), { ...options, existing });
+    assert.equal(result.transactions.length, 1);
+    assert.equal(result.duplicates, 2);
+  });
+
+  it('операции с разной суммой или комментарием — не дубли', () => {
+    const header = 'Дата;Тип;Категория;Сумма;Комментарий';
+    const existing = fromCSV(`${header}\n2026-11-05;Расход;Продукты;-1000.00;Magnum`, options).transactions;
+    const result = fromCSV(
+      `${header}\n2026-11-05;Расход;Продукты;-1000.50;Magnum\n2026-11-05;Расход;Продукты;-1000.00;Рынок`,
+      { ...options, existing },
+    );
+    assert.equal(result.transactions.length, 2);
+    assert.equal(result.duplicates, 0);
+  });
+});

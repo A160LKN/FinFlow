@@ -1,6 +1,6 @@
 // Service worker: кэширует файлы приложения, чтобы FinFlow открывался без интернета.
 // При изменении файлов увеличьте версию — старый кэш удалится при активации.
-const CACHE = 'finflow-v1';
+const CACHE = 'finflow-v2';
 
 const APP_SHELL = [
   './',

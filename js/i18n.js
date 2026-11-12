@@ -115,7 +115,10 @@ export const translations = {
     errorAmountTooBig: 'Сумма не может быть больше 1 000 000 000 ₸',
     errorDateEmpty: 'Укажите дату',
     errorDateFuture: 'Дата не может быть в будущем',
-    importDone: (added, skipped) => `Загружено операций: ${added}${skipped ? `, пропущено строк с ошибками: ${skipped}` : ''}`,
+    importDone: (added, skipped, duplicates) => `Загружено операций: ${added}`
+      + (duplicates ? `, уже были в приложении: ${duplicates}` : '')
+      + (skipped ? `, пропущено строк с ошибками: ${skipped}` : ''),
+    importAllDuplicates: (count) => `Все операции из файла уже есть в приложении (${count}) — ничего не добавлено`,
     importEmpty: 'В файле не нашлось ни одной операции. Нужен CSV, выгруженный из FinFlow.',
     offlineReady: 'FinFlow работает и без интернета',
     csvHeader: ['Дата', 'Тип', 'Категория', 'Сумма', 'Комментарий'],
@@ -192,7 +195,10 @@ export const translations = {
     errorAmountTooBig: 'Amount cannot exceed ₸1,000,000,000',
     errorDateEmpty: 'Choose a date',
     errorDateFuture: 'Date cannot be in the future',
-    importDone: (added, skipped) => `Transactions loaded: ${added}${skipped ? `, rows skipped due to errors: ${skipped}` : ''}`,
+    importDone: (added, skipped, duplicates) => `Transactions loaded: ${added}`
+      + (duplicates ? `, already in the app: ${duplicates}` : '')
+      + (skipped ? `, rows skipped due to errors: ${skipped}` : ''),
+    importAllDuplicates: (count) => `All transactions from the file are already in the app (${count}) — nothing added`,
     importEmpty: 'No transactions found in the file. Use a CSV exported from FinFlow.',
     offlineReady: 'FinFlow now works offline',
     csvHeader: ['Date', 'Type', 'Category', 'Amount', 'Note'],

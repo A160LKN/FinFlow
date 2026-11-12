@@ -53,15 +53,32 @@ export function parseCSVRows(text) {
   return rows.filter((r) => r.some((c) => c.trim() !== ''));
 }
 
+/** Ключ для поиска дублей: операции с одинаковыми датой, типом, категорией, суммой и комментарием */
+export const transactionKey = (tx) => [tx.date, tx.type, tx.category, tx.amount, tx.note].join('|');
+
 /**
  * Текст CSV → операции. Строки с ошибками пропускаются, их номера возвращаются в skipped.
  * Понимает файлы, выгруженные из FinFlow на любом из двух языков.
- * @returns {{ transactions: Array<object>, skipped: number[] }}
+ *
+ * Дубли (BUG-05): операции, которые уже есть в existing, не добавляются повторно.
+ * Считается количество: если в приложении 2 одинаковые операции, а в файле 3 — добавится одна.
+ * Поэтому повторный импорт того же файла ничего не добавляет, а законные повторы
+ * (два кофе по одной цене в один день) при первом импорте сохраняются.
+ *
+ * @returns {{ transactions: Array<object>, skipped: number[], duplicates: number }}
  */
-export function fromCSV(text, { today, createId, now = Date.now() }) {
+export function fromCSV(text, { today, createId, existing = [], now = Date.now() }) {
   const rows = parseCSVRows(text);
   const transactions = [];
   const skipped = [];
+  let duplicates = 0;
+
+  // Сколько раз каждая операция уже встречается в приложении
+  const alreadyHave = new Map();
+  for (const tx of existing) {
+    const key = transactionKey(tx);
+    alreadyHave.set(key, (alreadyHave.get(key) || 0) + 1);
+  }
 
   rows.forEach((cells, index) => {
     const line = index + 1;
@@ -75,16 +92,16 @@ export function fromCSV(text, { today, createId, now = Date.now() }) {
     const valid = isValidISODate(date) && date <= today && type && category && !parsed.errorKey;
     if (!valid) { skipped.push(line); return; }
 
-    transactions.push({
-      id: createId(),
-      type,
-      category: category.id,
-      amount: parsed.tiyn,
-      date,
-      note: note.slice(0, 80),
-      createdAt: now + index,
-    });
+    const tx = { type, category: category.id, amount: parsed.tiyn, date, note: note.slice(0, 80) };
+    const key = transactionKey(tx);
+    if (alreadyHave.get(key) > 0) {
+      alreadyHave.set(key, alreadyHave.get(key) - 1);
+      duplicates++;
+      return;
+    }
+
+    transactions.push({ id: createId(), ...tx, createdAt: now + index });
   });
 
-  return { transactions, skipped };
+  return { transactions, skipped, duplicates };
 }

@@ -384,15 +384,21 @@ function exportCSV() {
 }
 
 async function importCSV(file) {
-  const { transactions, skipped } = fromCSV(await file.text(), { today: todayISO(), createId });
+  const { transactions, skipped, duplicates } = fromCSV(await file.text(), {
+    today: todayISO(),
+    createId,
+    existing: state.transactions,   // BUG-05: не добавлять операции, которые уже есть
+  });
   els.importInput.value = '';
-  if (transactions.length === 0) return showToast(t().importEmpty);
+  if (transactions.length === 0) {
+    return showToast(duplicates ? t().importAllDuplicates(duplicates) : t().importEmpty);
+  }
 
   state.transactions.push(...transactions);
   save();
   state.month = monthOf(transactions.at(-1).date);
   render();
-  showToast(t().importDone(transactions.length, skipped.length));
+  showToast(t().importDone(transactions.length, skipped.length, duplicates));
 }
 
 function loadDemo() {
