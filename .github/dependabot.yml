@@ -1,0 +1,12 @@
+# Dependabot раз в месяц проверяет зависимости и присылает PR с обновлениями;
+# мелкие обновления собраны в один PR, чтобы не засыпать репозиторий
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: "/"
+    schedule:
+      interval: monthly
+    open-pull-requests-limit: 3
+    groups:
+      minor-and-patch:
+        update-types: [minor, patch]
