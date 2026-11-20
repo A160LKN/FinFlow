@@ -6,6 +6,11 @@ on:
   pull_request:
   workflow_dispatch:
 
+# Токен GitHub в этом конвейере только читает код. Job, которым нужно больше (публикация отчётов
+# на GitHub Pages), просят права сами — так чужой код из зависимостей не сможет ничего изменить в репозитории
+permissions:
+  contents: read
+
 jobs:
   quality:
     name: Lint и юнит-тесты
