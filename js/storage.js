@@ -17,11 +17,13 @@ export const storage = {
       return fallback;
     }
   },
+  /** false — сохранить не удалось (хранилище переполнено или запрещено): об этом нужно сказать человеку */
   set(key, value) {
     try {
       localStorage.setItem(key, JSON.stringify(value));
+      return true;
     } catch {
-      // хранилище недоступно — работаем без сохранения
+      return false;
     }
   },
 };

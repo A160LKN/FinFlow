@@ -121,6 +121,7 @@ export const translations = {
     importAllDuplicates: (count) => `Все операции из файла уже есть в приложении (${count}) — ничего не добавлено`,
     importEmpty: 'В файле не нашлось ни одной операции. Нужен CSV, выгруженный из FinFlow.',
     offlineReady: 'FinFlow работает и без интернета',
+    storageFailed: 'Не удалось сохранить: память браузера переполнена или недоступна. Выгрузите данные в CSV, чтобы их не потерять',
     csvHeader: ['Дата', 'Тип', 'Категория', 'Сумма', 'Комментарий'],
     demoNotes: {
       salary: 'Основная работа', food: 'Magnum', cafe: 'Обед с коллегами', transport: 'Яндекс Go',
@@ -201,6 +202,7 @@ export const translations = {
     importAllDuplicates: (count) => `All transactions from the file are already in the app (${count}) — nothing added`,
     importEmpty: 'No transactions found in the file. Use a CSV exported from FinFlow.',
     offlineReady: 'FinFlow now works offline',
+    storageFailed: 'Could not save: browser storage is full or unavailable. Export your data to CSV so you do not lose it',
     csvHeader: ['Date', 'Type', 'Category', 'Amount', 'Note'],
     demoNotes: {
       salary: 'Main job', food: 'Magnum', cafe: 'Lunch with colleagues', transport: 'Yandex Go',

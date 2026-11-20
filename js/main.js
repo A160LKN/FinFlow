@@ -40,8 +40,13 @@ const categoryName = (id) => findCategory(id)[state.lang];
 const categoryColor = (id) => `var(--cat-${findCategory(id).color})`;
 const createId = () => (crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(36) + Math.random().toString(36).slice(2));
 
-const save = () => storage.set(STORAGE_KEYS.transactions, state.transactions);
-const saveBudgets = () => storage.set(STORAGE_KEYS.budgets, state.budgets);
+// Хранилище переполнено или запрещено (приватный режим) — молча терять операции нельзя.
+// Предупреждение показывается после текущего уведомления («Сохранено»), чтобы не потерялось
+const warnIfNotSaved = (ok) => {
+  if (!ok) setTimeout(() => showToast(t().storageFailed), 0);
+};
+const save = () => warnIfNotSaved(storage.set(STORAGE_KEYS.transactions, state.transactions));
+const saveBudgets = () => warnIfNotSaved(storage.set(STORAGE_KEYS.budgets, state.budgets));
 
 /* ---------- Элементы ---------- */
 

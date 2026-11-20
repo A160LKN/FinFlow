@@ -14,6 +14,13 @@ function escapeCell(value) {
   return /[";\r\n]/.test(text) ? `"${text.replace(/"/g, '""')}"` : text;
 }
 
+// Защита от CSV-инъекции: комментарий «=HYPERLINK(…)» Excel выполнил бы как формулу.
+// Апостроф в начале Excel понимает как «это текст». Только для комментария: сумма «-6500.50» — число,
+// а тип и категория берутся из словаря приложения
+const FORMULA_START = /^[=+\-@\t\r]/;
+const formulaSafe = (text) => (FORMULA_START.test(text ?? '') ? `'${text}` : text);
+const fromFormulaSafe = (text) => (text.startsWith("'") && FORMULA_START.test(text.slice(1)) ? text.slice(1) : text);
+
 /** Операции → текст CSV (с BOM) */
 export function toCSV(transactions, lang, header) {
   const rows = [...transactions]
@@ -23,7 +30,7 @@ export function toCSV(transactions, lang, header) {
       TYPE_NAMES[tx.type][lang],
       findCategory(tx.category)[lang],
       ((tx.type === 'income' ? 1 : -1) * tx.amount / 100).toFixed(2),
-      tx.note,
+      formulaSafe(tx.note),
     ]);
   return BOM + [header, ...rows].map((row) => row.map(escapeCell).join(SEPARATOR)).join('\r\n');
 }
@@ -94,7 +101,8 @@ export function fromCSV(text, { today, createId, existing = [], noteId, now = Da
     const valid = isValidISODate(date) && date <= today && type && category && !parsed.errorKey;
     if (!valid) { skipped.push(line); return; }
 
-    const tx = { type, category: category.id, amount: parsed.tiyn, date, note: note.slice(0, 80) };
+    // Апостроф, добавленный при выгрузке, снимаем: повторный импорт того же файла не создаёт дублей
+    const tx = { type, category: category.id, amount: parsed.tiyn, date, note: fromFormulaSafe(note).slice(0, 80) };
     const key = transactionKey(tx, noteId);
     if (alreadyHave.get(key) > 0) {
       alreadyHave.set(key, alreadyHave.get(key) - 1);

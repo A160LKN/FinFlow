@@ -136,3 +136,20 @@ test.describe('Операции', () => {
     await expect(app.date).toHaveValue(TODAY);
   });
 });
+
+test.describe('Хранилище браузера', () => {
+  test('если сохранить не удалось — человек об этом узнаёт', async ({ page }) => {
+    // Переполненный localStorage: каждая запись бросает QuotaExceededError
+    await page.addInitScript(() => {
+      Storage.prototype.setItem = () => {
+        throw new DOMException('Хранилище переполнено', 'QuotaExceededError');
+      };
+    });
+    const full = new FinFlowPage(page);
+    await full.open();
+    await full.addTransaction({ amount: '1000', category: 'cafe' });
+
+    await expect(full.toast).toContainText('Не удалось сохранить');
+    await expect(full.items).toHaveCount(1); // операция осталась на экране — её можно выгрузить в CSV
+  });
+});
