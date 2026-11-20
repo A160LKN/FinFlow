@@ -120,3 +120,24 @@ describe('fromCSV — дубли (BUG-05)', () => {
     assert.equal(result.duplicates, 0);
   });
 });
+
+describe('CSV-инъекция', () => {
+  const evil = [{ id: 'e', date: '2026-11-05', type: 'expense', category: 'other', amount: 100,
+    note: '=HYPERLINK("http://evil","Чек")', createdAt: 3 }];
+
+  it('комментарий-формула выгружается как текст, сумма с минусом — как число', () => {
+    const line = toCSV(evil, 'ru', translations.ru.csvHeader).split('\r\n')[1];
+    assert.equal(line, `2026-11-05;Расход;Другое;-1.00;"'=HYPERLINK(""http://evil"",""Чек"")"`);
+  });
+  it('при повторном импорте апостроф снимается, и операция узнаётся как дубль', () => {
+    const csv = toCSV(evil, 'ru', translations.ru.csvHeader);
+    const { transactions, duplicates } = fromCSV(csv, { ...options, existing: evil });
+    assert.equal(duplicates, 1);
+    assert.equal(transactions.length, 0);
+    assert.equal(fromCSV(csv, options).transactions[0].note, evil[0].note);
+  });
+  it('обычный апостроф в начале комментария не трогается', () => {
+    const own = [{ ...evil[0], note: "'90-е" }];
+    assert.equal(fromCSV(toCSV(own, 'ru', translations.ru.csvHeader), options).transactions[0].note, "'90-е");
+  });
+});
